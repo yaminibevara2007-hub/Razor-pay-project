@@ -61,6 +61,17 @@ def _load_model():
 
 _load_model()
 
+@app.get("/")
+def root():
+    return {
+        "service": "ML Recovery Service",
+        "status": "online",
+        "health": "/health",
+        "model_info": "/model/info",
+        "docs": "/docs"
+    }
+
+
 # ─── Health endpoint ──────────────────────────────────────────────────────────
 @app.get("/health")
 def health_check():

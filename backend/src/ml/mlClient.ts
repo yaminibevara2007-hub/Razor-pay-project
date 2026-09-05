@@ -10,7 +10,7 @@ export class MLServiceError extends Error {
 
 export class MLClient {
   async predict(request: PredictionRequest): Promise<PredictionResponse> {
-    const baseUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+    const baseUrl = process.env.ML_SERVICE_URL || 'http://localhost:8001';
 
     try {
       const response = await axios.post<PredictionResponse>(

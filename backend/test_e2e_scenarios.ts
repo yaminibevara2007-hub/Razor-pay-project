@@ -12,7 +12,7 @@
 import axios from "axios";
 
 const API_BASE = "http://localhost:5000/api";
-const ML_BASE = "http://localhost:8000";
+const ML_BASE = "http://localhost:8001";
 
 let passed = 0;
 let failed = 0;
