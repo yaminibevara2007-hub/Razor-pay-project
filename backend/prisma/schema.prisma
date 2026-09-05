@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TransactionStatus {
+  PENDING
+  FAILED
+  RECOVERED
+  FAILED_PERMANENTLY
+}
+
+enum RecoveryAction {
+  RETRY_NOW
+  RETRY_LATER
+  ALTERNATE_ROUTE
+  CUSTOMER_ACTION_REQUIRED
+  STOP
+}
+
+enum RecoveryResult {
+  SUCCESS
+  FAILURE
+  PENDING
+}
+
+enum SafetyResult {
+  PASSED
+  BLOCKED
+  FLAG_FOR_REVIEW
+}
+
+enum GatewayStatus {
+  HEALTHY
+  DEGRADED
+  DOWN
+}
+
+model Transaction {
+  id                       String            @id @default(uuid())
+  transactionId            String            @unique
+  amount                   Float
+  currency                 String            @default("USD")
+  paymentMethod            String
+  gateway                  String
+  timestamp                DateTime          @default(now())
+  failureReason            String
+  networkLatency           Int
+  gatewayHealth            Float
+  issuerHealth             Float
+  customerActionRequired   Boolean
+  previousAttemptCount     Int
+  recentGatewaySuccessRate Float
+  historicalRecoveryRate   Float
+  timeSinceFailure         Int
+  status                   TransactionStatus @default(FAILED)
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+
+  modelPredictions  ModelPrediction[]
+  recoveryDecisions RecoveryDecision[]
+  safetyChecks      SafetyCheck[]
+  recoveryAttempts  RecoveryAttempt[]
+  auditLogs         AuditLog[]
+}
+
+model ModelPrediction {
+  id                  String   @id @default(uuid())
+  transactionId       String
+  modelName           String
+  modelVersion        String
+  recoveryProbability Float
+  features            Json
+  createdAt           DateTime @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [transactionId])
+}
+
+model RecoveryDecision {
+  id                    String         @id @default(uuid())
+  transactionId         String
+  recoveryProbability   Float
+  recommendedAction     RecoveryAction
+  suggestedDelay        Int?
+  expectedRecoveryValue Float?
+  decisionReason        String?
+  createdAt             DateTime       @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [transactionId])
+}
+
+model SafetyCheck {
+  id                     String       @id @default(uuid())
+  transactionId          String
+  transactionStatusCheck Boolean
+  duplicateCheck         Boolean
+  idempotencyCheck       Boolean
+  retryLimitCheck        Boolean
+  cooldownCheck          Boolean
+  riskThresholdCheck     Boolean
+  finalSafetyResult      SafetyResult
+  failureReason          String?
+  createdAt              DateTime     @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [transactionId])
+}
+
+model RecoveryAttempt {
+  id            String         @id @default(uuid())
+  transactionId String
+  attemptNumber Int
+  action        RecoveryAction
+  attemptedAt   DateTime       @default(now())
+  result        RecoveryResult @default(PENDING)
+  recoveryValue Float?
+  simulated     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [transactionId])
+}
+
+model GatewayHealth {
+  id          String        @id @default(uuid())
+  gateway     String        @unique
+  successRate Float
+  latency     Int
+  status      GatewayStatus
+  timestamp   DateTime      @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  transactionId String?
+  eventType     String
+  eventData     Json
+  timestamp     DateTime @default(now())
+
+  transaction Transaction? @relation(fields: [transactionId], references: [transactionId])
+}
+
+model ExperimentResult {
+  id                  String   @id @default(uuid())
+  experimentName      String
+  strategy            String
+  datasetSize         Int
+  recoveryRate        Float
+  recoveredValue      Float
+  averageAttempts     Float
+  unnecessaryAttempts Float
+  recoveryLatency     Int
+  recoveryCost        Float
+  createdAt           DateTime @default(now())
+}

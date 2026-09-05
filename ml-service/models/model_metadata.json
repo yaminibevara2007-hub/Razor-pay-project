@@ -1,0 +1,41 @@
+{
+  "model_name": "recovery_logistic_regression",
+  "model_version": "1.0.0",
+  "training_date": "2026-09-05T08:16:34.513662+00:00",
+  "dataset_size": 10000,
+  "train_size": 8000,
+  "test_size": 2000,
+  "features": [
+    "amount",
+    "network_latency",
+    "gateway_health",
+    "issuer_health",
+    "customer_action_required",
+    "previous_attempt_count",
+    "recent_gateway_success_rate",
+    "historical_recovery_rate",
+    "time_since_failure",
+    "payment_method",
+    "gateway",
+    "failure_reason"
+  ],
+  "target": "recovered",
+  "metrics": {
+    "accuracy": 0.6805,
+    "precision": 0.5372,
+    "recall": 0.8382,
+    "f1_score": 0.6548,
+    "roc_auc": 0.7781,
+    "confusion_matrix": [
+      [
+        755,
+        522
+      ],
+      [
+        117,
+        606
+      ]
+    ]
+  },
+  "notice": "SIMULATED DATA NOTICE: Model trained on synthetic payment failure data generated for this student research project. Metrics do NOT represent real payment system performance."
+}
